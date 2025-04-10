@@ -1,9 +1,10 @@
+package project.hackmol.hackmolinstafix.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
 import androidx.compose.material3.*
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
@@ -15,7 +16,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import project.hackmol.hackmolinstafix.ui.theme.backgroundColor
@@ -24,21 +24,22 @@ import project.hackmol.hackmolinstafix.ui.theme.primaryColor
 import project.hackmol.hackmolinstafix.ui.theme.secondaryColor
 import project.hackmol.hackmolinstafix.ui.theme.subtextColor
 import project.hackmol.hackmolinstafix.ui.theme.textColor
+import project.hackmol.hackmolinstafix.ui.theme.HackmolInstafixTheme
+import project.hackmol.hackmolinstafix.viewmodel.AuthViewModel
 
 @Composable
-fun InstaFixHomeScreen() {
-
-
-    Box(
-        modifier = Modifier.fillMaxSize()
-    ) {
+fun HomeScreen(
+    authViewModel: AuthViewModel,
+    onLogout: () -> Unit
+) {
+    Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(backgroundColor)
-
         ) {
 
+            // 🔼 Header with logout
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -49,24 +50,36 @@ fun InstaFixHomeScreen() {
                         )
                     )
             ) {
-                Column(
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "InstaFix",
-                        color = Color.White,
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Welcome back, User",
-                        color = Color.White,
-                        fontSize = 18.sp
-                    )
+                    Column {
+                        Text(
+                            text = "InstaFix",
+                            color = Color.White,
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Welcome back, User",
+                            color = Color.White,
+                            fontSize = 18.sp
+                        )
+                    }
+
+                    TextButton(
+                        onClick = {
+                            authViewModel.logout()
+                            onLogout()
+                        }
+                    ) {
+                        Text("Logout", color = Color.White)
+                    }
                 }
             }
 
@@ -95,13 +108,13 @@ fun InstaFixHomeScreen() {
 
                     // Progress indicator
                     LinearProgressIndicator(
-                        progress = 0.8f,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(8.dp)
                             .clip(RoundedCornerShape(4.dp)),
                         color = primaryColor,
-                        trackColor = Color(0xFFE5E7EB)
+                        trackColor = Color(0xFFE5E7EB),
+                        progress = { 0.8f }
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -418,11 +431,11 @@ object Icons {
         )
     }
 }
-
-@Preview(showBackground = true)
-@Composable
-fun InstaFixHomeScreenPreview() {
-    MaterialTheme {
-        InstaFixHomeScreen()
-    }
-}
+//
+//@Preview(showBackground = true)
+//@Composable
+//fun InstaFixHomeScreenPreview() {
+//    HackmolInstafixTheme {
+//        HomeScreen()
+//    }
+//}

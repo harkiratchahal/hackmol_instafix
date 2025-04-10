@@ -21,17 +21,18 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import project.hackmol.hackmolinstafix.ui.theme.*
-import project.hackmol.hackmolinstafix.data.loginSignup.Resource
-import project.hackmol.hackmolinstafix.data.viewmodel.AuthViewModel
+import project.hackmol.hackmolinstafix.util.Resource
+import project.hackmol.hackmolinstafix.viewmodel.AuthViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignupScreen(
-    authViewModel: AuthViewModel = viewModel(),
+    authViewModel: AuthViewModel ,
     onSignUpSuccess: () -> Unit,
     onLoginClick: () -> Unit
 ) {
@@ -358,6 +359,16 @@ fun SignupScreen(
             }
         }
     }
+}
+
+@Preview
+@Composable
+fun SignupScreenPreview() {
+    SignupScreen(
+        onSignUpSuccess = {},
+        authViewModel = AuthViewModel(),
+        onLoginClick = {}
+    )
 }
 
 // Validation function for sign up inputs

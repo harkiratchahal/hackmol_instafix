@@ -1,7 +1,5 @@
 package project.hackmol.hackmolinstafix.ui.screens
 
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -9,20 +7,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -33,35 +27,30 @@ import project.hackmol.hackmolinstafix.viewmodel.AuthViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(
-    authViewModel: AuthViewModel = viewModel(),
-    onLoginSuccess: () -> Unit,
-    onSignUpClick: () -> Unit,
-    onForgotPasswordClick: () -> Unit
+fun ForgotPasswordScreen(
+    authViewModel: AuthViewModel ,
+    onBackToLogin: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var passwordVisible by remember { mutableStateOf(false) }
     var showError by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
+    var showSuccess by remember { mutableStateOf(false) }
 
-    val loginResult = authViewModel.loginResult.observeAsState()
-    //val context = LocalContext.current
+    val resetPasswordResult = authViewModel.resetPasswordResult.observeAsState()
 
-
-    LaunchedEffect(loginResult.value) {
-        when (val result = loginResult.value) {
+    // Handle reset password result
+    LaunchedEffect(resetPasswordResult.value) {
+        when (val result = resetPasswordResult.value) {
             is Resource.Success -> {
                 showError = false
-                onLoginSuccess()
+                showSuccess = true
             }
             is Resource.Error -> {
                 showError = true
+                showSuccess = false
                 errorMessage = result.message
             }
-            else -> {
-
-            }
+            else -> { /* Loading state handled by loading indicator */ }
         }
     }
 
@@ -107,7 +96,7 @@ fun LoginScreen(
                 )
 
                 Text(
-                    text = "Repair. Reuse. Reduce waste.",
+                    text = "Forgot your password?",
                     fontSize = 14.sp,
                     color = subtextColor
                 )
@@ -126,10 +115,17 @@ fun LoginScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Welcome Back",
+                        text = "Reset Password",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         color = textColor,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+
+                    Text(
+                        text = "Enter your email address and we'll send you instructions to reset your password.",
+                        fontSize = 14.sp,
+                        color = subtextColor,
                         modifier = Modifier.padding(bottom = 24.dp)
                     )
 
@@ -144,13 +140,24 @@ fun LoginScreen(
                         )
                     }
 
+                    // Show success message
+                    if (showSuccess) {
+                        Text(
+                            text = "Password reset email sent! Check your inbox.",
+                            color = primaryColor,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 16.dp)
+                        )
+                    }
+
                     // Email field
                     OutlinedTextField(
                         value = email,
                         onValueChange = { email = it },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 16.dp),
+                            .padding(bottom = 24.dp),
                         label = { Text("Email") },
                         leadingIcon = {
                             Icon(
@@ -166,62 +173,13 @@ fun LoginScreen(
                         ),
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Email,
-                            imeAction = ImeAction.Next
-                        ),
-                        shape = RoundedCornerShape(12.dp)
-                    )
-
-                    OutlinedTextField(
-                        value = password,
-                        onValueChange = { password = it },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 8.dp),
-                        label = { Text("Password") },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Lock,
-                                contentDescription = "Password",
-                                tint = primaryColor
-                            )
-                        },
-                        trailingIcon = {
-                            IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                                Icon(
-                                    imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                                    contentDescription = if (passwordVisible) "Hide password" else "Show password",
-                                    tint = primaryColor
-                                )
-                            }
-                        },
-                        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = primaryColor,
-                            focusedLabelColor = primaryColor,
-                            cursorColor = primaryColor
-                        ),
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Password,
                             imeAction = ImeAction.Done
                         ),
                         shape = RoundedCornerShape(12.dp)
                     )
 
-                    TextButton(
-                        onClick = onForgotPasswordClick,
-                        modifier = Modifier
-                            .align(Alignment.End)
-                            .padding(bottom = 16.dp)
-                    ) {
-                        Text(
-                            text = "Forgot Password?",
-                            color = primaryColor,
-                            fontSize = 12.sp
-                        )
-                    }
-
                     // Show loading indicator when in loading state
-                    when (loginResult.value) {
+                    when (resetPasswordResult.value) {
                         is Resource.Loading -> {
                             CircularProgressIndicator(
                                 modifier = Modifier
@@ -233,11 +191,11 @@ fun LoginScreen(
                         else -> {
                             Button(
                                 onClick = {
-                                    if (email.isNotBlank() && password.isNotBlank()) {
-                                        authViewModel.loginUser(email, password)
+                                    if (email.isNotBlank()) {
+                                        authViewModel.resetPassword(email)
                                     } else {
                                         showError = true
-                                        errorMessage = "Email and password cannot be empty"
+                                        errorMessage = "Email cannot be empty"
                                     }
                                 },
                                 modifier = Modifier
@@ -246,37 +204,31 @@ fun LoginScreen(
                                 shape = RoundedCornerShape(12.dp),
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = primaryColor
-                                )
+                                ),
+                                enabled = email.isNotBlank()
                             ) {
                                 Text(
-                                    text = "Login",
+                                    text = "Send Reset Link",
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    TextButton(
+                        onClick = onBackToLogin
+                    ) {
+                        Text(
+                            text = "Back to Login",
+                            color = primaryColor,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp
+                        )
+                    }
                 }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Sign up section
-            Text(
-                text = "Don't have an account?",
-                color = subtextColor,
-                fontSize = 14.sp
-            )
-
-            TextButton(
-                onClick = onSignUpClick
-            ) {
-                Text(
-                    text = "Sign Up",
-                    color = primaryColor,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
-                )
             }
         }
     }
@@ -284,12 +236,9 @@ fun LoginScreen(
 
 @Preview(showBackground = true)
 @Composable
-fun LoginScreenPreview() {
-    LoginScreen(
-        authViewModel = viewModel(),
-        onLoginSuccess = {},
-        onSignUpClick = {},
-        onForgotPasswordClick = {}
+fun ForgotPasswordScreenPreview() {
+    ForgotPasswordScreen(
+        authViewModel = AuthViewModel(),
+        onBackToLogin = {}
     )
 }
-
