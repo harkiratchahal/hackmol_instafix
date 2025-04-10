@@ -1,6 +1,7 @@
 package project.hackmol.hackmolinstafix.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -8,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.*
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -18,6 +20,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import project.hackmol.hackmolinstafix.navigation.Screen
+import project.hackmol.hackmolinstafix.ui.screens.components.BottomNavigationBar
+import project.hackmol.hackmolinstafix.ui.screens.components.Icons
 import project.hackmol.hackmolinstafix.ui.theme.backgroundColor
 import project.hackmol.hackmolinstafix.ui.theme.cardColor
 import project.hackmol.hackmolinstafix.ui.theme.primaryColor
@@ -30,8 +37,17 @@ import project.hackmol.hackmolinstafix.viewmodel.AuthViewModel
 @Composable
 fun HomeScreen(
     authViewModel: AuthViewModel,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    navController: NavHostController
 ) {
+
+    val systemUiController = rememberSystemUiController()
+
+    SideEffect {
+        // Hide status bar and set background to match your theme
+        systemUiController.setStatusBarColor(Color.Transparent, darkIcons = false)
+        systemUiController.isStatusBarVisible = false
+    }
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -150,7 +166,10 @@ fun HomeScreen(
                     description = "Upload a photo for instant diagnosis",
                     icon = { Icons.AIIcon() },
                     primaryColor = primaryColor,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        navController.navigate(Screen.AIDiagnosis.route)
+                    }
                 )
 
                 // Book a Pro Card
@@ -159,7 +178,10 @@ fun HomeScreen(
                     description = "Find verified professionals nearby",
                     icon = { Icons.ProIcon() },
                     primaryColor = primaryColor,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        navController.navigate(Screen.BookPro.route)
+                    }
                 )
             }
 
@@ -178,7 +200,9 @@ fun HomeScreen(
                     description = "Real-time updates on your repair",
                     icon = { Icons.TrackIcon() },
                     primaryColor = primaryColor,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        navController.navigate(Screen.TrackRepair.route)                  }
                 )
 
                 // Eco Impact Card
@@ -187,7 +211,10 @@ fun HomeScreen(
                     description = "View your carbon footprint savings",
                     icon = { Icons.EcoIcon() },
                     primaryColor = primaryColor,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        navController.navigate(Screen.EcoImpact.route)
+                    }
                 )
             }
 
@@ -254,11 +281,18 @@ fun ServiceCard(
     description: String,
     icon: @Composable () -> Unit,
     primaryColor: Color,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick : () -> Unit
 ) {
     Card(
         modifier = modifier
-            .height(160.dp),
+            .height(160.dp)
+            .clickable(
+                enabled = true,
+                onClick = {
+                    onClick()
+                }
+            ),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
@@ -305,132 +339,6 @@ fun ServiceCard(
     }
 }
 
-@Composable
-fun BottomNavigationBar(
-    primaryColor: Color,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(64.dp),
-        color = Color.White,
-        shadowElevation = 10.dp
-    ) {
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            BottomNavItem(
-                icon = { Icons.FixIcon(tint = primaryColor) },
-                label = "AI Fix",
-                isSelected = true,
-                primaryColor = primaryColor
-            )
-
-            BottomNavItem(
-                icon = { Icons.ProIcon(tint = Color.Gray) },
-                label = "Book Pro",
-                isSelected = false,
-                primaryColor = primaryColor
-            )
-
-            BottomNavItem(
-                icon = { Icons.TrackIcon(tint = Color.Gray) },
-                label = "Track",
-                isSelected = false,
-                primaryColor = primaryColor
-            )
-
-            BottomNavItem(
-                icon = { Icons.ProfileIcon(tint = Color.Gray) },
-                label = "Profile",
-                isSelected = false,
-                primaryColor = primaryColor
-            )
-        }
-    }
-}
-
-@Composable
-fun BottomNavItem(
-    icon: @Composable () -> Unit,
-    label: String,
-    isSelected: Boolean,
-    primaryColor: Color
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        icon()
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        Text(
-            text = label,
-            color = if (isSelected) primaryColor else Color.Gray,
-            fontSize = 12.sp
-        )
-    }
-}
-
-object Icons {
-    @Composable
-    fun AIIcon(tint: Color = Color(0xFF8B5CF6)) {
-        Icon(
-            painter = painterResource(id = android.R.drawable.ic_menu_add),
-            contentDescription = "AI Diagnosis",
-            tint = tint
-        )
-    }
-
-    @Composable
-    fun ProIcon(tint: Color = Color(0xFF8B5CF6)) {
-        Icon(
-            painter = painterResource(id = android.R.drawable.ic_menu_manage),
-            contentDescription = "Book a Pro",
-            tint = tint
-        )
-    }
-
-    @Composable
-    fun TrackIcon(tint: Color = Color(0xFF8B5CF6)) {
-        Icon(
-            painter = painterResource(id = android.R.drawable.ic_menu_mylocation),
-            contentDescription = "Track Repair",
-            tint = tint
-        )
-    }
-
-    @Composable
-    fun EcoIcon(tint: Color = Color(0xFF8B5CF6)) {
-        Icon(
-            painter = painterResource(id = android.R.drawable.ic_menu_save),
-            contentDescription = "Eco Impact",
-            tint = tint
-        )
-    }
-
-    @Composable
-    fun FixIcon(tint: Color = Color(0xFF8B5CF6)) {
-        Icon(
-            painter = painterResource(id = android.R.drawable.ic_menu_help),
-            contentDescription = "AI Fix",
-            tint = tint
-        )
-    }
-
-    @Composable
-    fun ProfileIcon(tint: Color = Color(0xFF8B5CF6)) {
-        Icon(
-            painter = painterResource(id = android.R.drawable.ic_menu_myplaces),
-            contentDescription = "Profile",
-            tint = tint
-        )
-    }
-}
 //
 //@Preview(showBackground = true)
 //@Composable

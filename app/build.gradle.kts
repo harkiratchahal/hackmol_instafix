@@ -48,6 +48,9 @@ android {
 }
 
 dependencies {
+    implementation("io.coil-kt:coil-compose:2.7.0")
+// Permissions handling (optional but recommended)
+    implementation("com.google.accompanist:accompanist-permissions:0.37.2")
 
     implementation("androidx.compose.ui:ui:1.7.8")
     implementation("androidx.compose.ui:ui-tooling-preview:1.7.8")
@@ -73,6 +76,14 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.10.2")
 
     implementation("androidx.compose.runtime:runtime-livedata:1.7.8")
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.36.0")
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation ("com.squareup.retrofit2:converter-gson:2.11.0")
+
+        // Accompanist for System UI controller (if not already added)
+    implementation ("com.google.accompanist:accompanist-systemuicontroller:0.36.0")
+
+
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

@@ -79,8 +79,21 @@ fun AppNavigation(
                     navController.navigate(Screen.Login.route) {
                         popUpTo(Screen.Home.route) { inclusive = true }
                     }
-                }
+                },
+                navController = navController,
             )
+        }
+
+        composable (route = Screen.AIDiagnosis.route){
+            AIDiagnosisScreen(navController)
+        }
+
+        composable(route = Screen.EcoImpact.route) {
+            EcoImpactScreen(navController)
+        }
+
+        composable(route = Screen.BookPro.route) {
+            BookProScreen(navController)
         }
 
     }
@@ -91,6 +104,10 @@ sealed class Screen(val route: String) {
     object Signup : Screen("signup")
     object ForgotPassword : Screen("forgot_password")
     object Home : Screen("home")
+    object AIDiagnosis : Screen("ai")
+    object TrackRepair : Screen("trackRepair")
+    object EcoImpact : Screen("ecoImpact")
+    object BookPro : Screen("bookPro")
 }
 
 

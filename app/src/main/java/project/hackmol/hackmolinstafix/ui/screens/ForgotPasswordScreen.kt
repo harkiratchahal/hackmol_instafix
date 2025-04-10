@@ -20,7 +20,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import project.hackmol.hackmolinstafix.ui.theme.*
 import project.hackmol.hackmolinstafix.util.Resource
 import project.hackmol.hackmolinstafix.viewmodel.AuthViewModel
