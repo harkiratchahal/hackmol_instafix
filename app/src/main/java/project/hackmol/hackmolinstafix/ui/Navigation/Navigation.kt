@@ -96,6 +96,18 @@ fun AppNavigation(
             BookProScreen(navController)
         }
 
+        composable(Screen.TrackRepair.route) {
+            TrackRepairScreen(
+                navController = navController,
+                // pass in some test data or data from a ViewModel
+                currentStep = 1,
+                userLat = 12.9716,
+                userLng = 77.5946,
+                handymanLat = 12.9616,
+                handymanLng = 77.5846
+            )
+        }
+
     }
 }
 

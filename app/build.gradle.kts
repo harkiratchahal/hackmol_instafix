@@ -82,6 +82,9 @@ dependencies {
 
         // Accompanist for System UI controller (if not already added)
     implementation ("com.google.accompanist:accompanist-systemuicontroller:0.36.0")
+    implementation("com.google.maps.android:maps-compose:6.5.2")
+    implementation("com.google.android.gms:play-services-maps:19.1.0")
+// Latest version
 
 
 
