@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -49,7 +50,7 @@ import java.util.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AIDiagnosisScreen(
-    navController: NavController
+    navController: NavHostController
 ) {
     // Hide status bar
     val systemUiController = rememberSystemUiController()
@@ -172,7 +173,8 @@ fun AIDiagnosisScreen(
         bottomBar = {
             BottomNavigationBar(
                 primaryColor = primaryColor,
-                modifier = Modifier
+                modifier = Modifier,
+                navController =navController
             )
         }
     ) { paddingValues ->

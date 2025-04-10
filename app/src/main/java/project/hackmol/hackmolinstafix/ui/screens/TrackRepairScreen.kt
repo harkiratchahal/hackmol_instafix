@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
@@ -25,13 +26,14 @@ import project.hackmol.hackmolinstafix.ui.screens.components.RequestLocationPerm
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TrackRepairScreen(
-    navController: NavController,
+    navController: NavHostController,
     // Example: pass in current step/stage and lat/long from your ViewModel or arguments
     currentStep: Int = 2, // 0=Requested,1=EnRoute,2=InProgress,3=Completed
     userLat: Double = 28.6139,
     userLng: Double = 77.2090,
     handymanLat: Double = 28.7041,
     handymanLng: Double = 77.1025,
+
 ) {
 
 
@@ -54,7 +56,9 @@ fun TrackRepairScreen(
             )
         },
         bottomBar = {
-            BottomNavigationBar(primaryColor = primaryColor)
+            BottomNavigationBar(primaryColor = primaryColor,
+                modifier = Modifier,
+                navController = navController)
         }
     ) { paddingValues ->
         RequestLocationPermissions {

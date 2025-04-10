@@ -35,6 +35,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import project.hackmol.hackmolinstafix.ui.screens.components.BottomNavigationBar
@@ -43,7 +44,7 @@ import project.hackmol.hackmolinstafix.ui.theme.primaryColor
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookProScreen(
-    navController: NavController
+    navController: NavHostController
 ) {
 
     val systemUiController = rememberSystemUiController()
@@ -72,7 +73,8 @@ fun BookProScreen(
         bottomBar = {
             BottomNavigationBar(
                 primaryColor = primaryColor,
-                modifier = Modifier
+                modifier = Modifier,
+                navController = navController
             )
         }
     ) { paddingValues ->

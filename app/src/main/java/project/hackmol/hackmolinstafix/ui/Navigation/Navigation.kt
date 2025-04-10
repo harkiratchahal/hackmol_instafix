@@ -108,6 +108,20 @@ fun AppNavigation(
             )
         }
 
+        composable(Screen.Profile.route) {
+            ProfileScreen(
+                userName = authViewModel.currentUser?.displayName,
+                userEmail = authViewModel.currentUser?.email,
+                authViewModel = authViewModel,
+                onLogoutClick = {
+                    isUserLoggedIn = false
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Home.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
     }
 }
 
@@ -120,6 +134,7 @@ sealed class Screen(val route: String) {
     object TrackRepair : Screen("trackRepair")
     object EcoImpact : Screen("ecoImpact")
     object BookPro : Screen("bookPro")
+    object Profile : Screen("profile")
 }
 
 

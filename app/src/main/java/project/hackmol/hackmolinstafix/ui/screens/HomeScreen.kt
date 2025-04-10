@@ -272,7 +272,8 @@ fun HomeScreen(
 
         BottomNavigationBar(
             primaryColor = primaryColor,
-            modifier = Modifier.align(Alignment.BottomCenter)
+            modifier = Modifier.align(Alignment.BottomCenter),
+            navController = navController
         )
     }
 }

@@ -16,7 +16,7 @@ data class DiagnosisResult(
 
 interface DiagnosisApiService {
     @Multipart
-    @POST("diagnose")
+    @POST("predict")
     suspend fun uploadImage(
         @Part image: MultipartBody.Part
     ): DiagnosisResult

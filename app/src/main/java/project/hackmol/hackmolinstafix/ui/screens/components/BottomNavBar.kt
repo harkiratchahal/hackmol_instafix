@@ -1,5 +1,6 @@
 package project.hackmol.hackmolinstafix.ui.screens.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,12 +18,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import project.hackmol.hackmolinstafix.navigation.Screen
 
 
 @Composable
 fun BottomNavigationBar(
     primaryColor: Color,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    navController: NavHostController
 ) {
     Surface(
         modifier = modifier
@@ -40,28 +44,41 @@ fun BottomNavigationBar(
                 icon = { Icons.FixIcon(tint = primaryColor) },
                 label = "AI Fix",
                 isSelected = true,
-                primaryColor = primaryColor
+                primaryColor = primaryColor,
+                onclick = {
+                    navController.navigate(Screen.AIDiagnosis.route)
+                }
             )
 
             BottomNavItem(
                 icon = { Icons.ProIcon(tint = Color.Gray) },
                 label = "Book Pro",
                 isSelected = false,
-                primaryColor = primaryColor
+                primaryColor = primaryColor,
+                onclick = {
+                    navController.navigate(Screen.BookPro.route)
+                }
+
             )
 
             BottomNavItem(
                 icon = { Icons.TrackIcon(tint = Color.Gray) },
                 label = "Track",
                 isSelected = false,
-                primaryColor = primaryColor
+                primaryColor = primaryColor,
+                onclick = {
+                    navController.navigate(Screen.TrackRepair.route)
+                }
             )
 
             BottomNavItem(
                 icon = { Icons.ProfileIcon(tint = Color.Gray) },
                 label = "Profile",
                 isSelected = false,
-                primaryColor = primaryColor
+                primaryColor = primaryColor,
+                onclick = {
+                    navController.navigate(Screen.Profile.route)
+                }
             )
         }
     }
@@ -72,11 +89,18 @@ fun BottomNavItem(
     icon: @Composable () -> Unit,
     label: String,
     isSelected: Boolean,
-    primaryColor: Color
+    primaryColor: Color,
+    onclick : () -> Unit
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.clickable(
+            enabled = true,
+            onClick = {
+                onclick()
+            }
+        )
     ) {
         icon()
 

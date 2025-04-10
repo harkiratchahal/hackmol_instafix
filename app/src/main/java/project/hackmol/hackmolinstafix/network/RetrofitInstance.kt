@@ -8,7 +8,7 @@ object RetrofitInstance {
     private val retrofit by lazy {
         Retrofit.Builder()
             // Replace with your backend URL (e.g., your ngrok URL or cloud endpoint)
-            .baseUrl("http://<your-backend-url>/")
+            .baseUrl("https://2mpro9m8.ngrok.com/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
