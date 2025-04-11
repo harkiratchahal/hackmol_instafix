@@ -44,6 +44,16 @@ android {
         kotlinCompilerExtensionVersion = "1.5.1"
     }
 
+    aaptOptions{
+        noCompress("tflite")
+    }
+    configurations.all {
+        resolutionStrategy {
+            force ("org.tensorflow:tensorflow-lite:2.17.0")
+            force ("org.tensorflow:tensorflow-lite-support:0.5.0")
+        }
+    }
+
 
 }
 
@@ -85,6 +95,9 @@ dependencies {
     implementation("com.google.maps.android:maps-compose:6.5.2")
     implementation("com.google.android.gms:play-services-maps:19.1.0")
 // Latest version
+
+    implementation("org.tensorflow:tensorflow-lite:2.17.0")
+    implementation("org.tensorflow:tensorflow-lite-support:0.5.0")
 
 
 

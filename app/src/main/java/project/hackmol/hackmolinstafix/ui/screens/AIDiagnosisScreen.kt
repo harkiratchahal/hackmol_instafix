@@ -1,9 +1,9 @@
-// AIDiagnosisScreen.kt
 package project.hackmol.hackmolinstafix.ui.screens
 
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -30,22 +30,28 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.launch
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.MultipartBody
-import project.hackmol.hackmolinstafix.network.RetrofitInstance
-import project.hackmol.hackmolinstafix.network.DiagnosisResult
+import project.hackmol.hackmolinstafix.tflite.ImageClassifier
 import project.hackmol.hackmolinstafix.ui.screens.components.BottomNavigationBar
 import project.hackmol.hackmolinstafix.ui.theme.primaryColor
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+
+/**
+ * Data class to hold the diagnosis result.
+ * (The cost values are mocked for demonstration purposes.)
+ */
+data class DiagnosisResult(
+    val diagnosis: String,
+    val repair_cost: Int,
+    val handyman_cost: Int,
+    val total_cost: Int
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,36 +70,27 @@ fun AIDiagnosisScreen(
     var showBottomSheet by remember { mutableStateOf(false) }
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     var hasPhoto by remember { mutableStateOf(false) }
-
-    // For API result display
     var diagnosisResult by remember { mutableStateOf<DiagnosisResult?>(null) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
     val coroutineScope = rememberCoroutineScope()
 
-    // For camera permission
+    // Check permissions for camera and gallery
     var hasCameraPermission by remember {
         mutableStateOf(
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.CAMERA
-            ) == PackageManager.PERMISSION_GRANTED
+            ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
+                    == PackageManager.PERMISSION_GRANTED
         )
     }
-
-    // For gallery permission
     var hasGalleryPermission by remember {
         mutableStateOf(
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.READ_MEDIA_IMAGES
-            ) == PackageManager.PERMISSION_GRANTED ||
-                    ContextCompat.checkSelfPermission(
-                        context,
-                        Manifest.permission.READ_EXTERNAL_STORAGE
-                    ) == PackageManager.PERMISSION_GRANTED
+            ContextCompat.checkSelfPermission(context, Manifest.permission.READ_MEDIA_IMAGES)
+                    == PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_GRANTED
         )
     }
 
-    // Activity result launchers for camera and gallery
+    // Launcher for camera capture
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
     ) { success: Boolean ->
@@ -103,6 +100,7 @@ fun AIDiagnosisScreen(
         }
     }
 
+    // Launcher for gallery selection
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -113,7 +111,7 @@ fun AIDiagnosisScreen(
         }
     }
 
-    // Permission requesters
+    // Request camera permission launcher
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
@@ -130,6 +128,7 @@ fun AIDiagnosisScreen(
         }
     }
 
+    // Request gallery permission launcher
     val galleryPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
@@ -139,21 +138,21 @@ fun AIDiagnosisScreen(
         }
     }
 
-    // Function to call the AI API via Retrofit
-    suspend fun analyzeImage(uri: Uri): DiagnosisResult? {
+    // Function to perform local image analysis via the TFLite model
+    suspend fun analyzeImageLocally(context: Context, uri: Uri): String {
         val contentResolver = context.contentResolver
         val inputStream = contentResolver.openInputStream(uri)
-        val bytes = inputStream?.readBytes()
-        val requestBody = bytes?.toRequestBody("image/*".toMediaTypeOrNull())
-        val multipartBody = MultipartBody.Part.createFormData(
-            "image", "upload.jpg", requestBody!!
-        )
-        return try {
-            RetrofitInstance.api.uploadImage(multipartBody)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
+        if (inputStream == null) {
+            throw Exception("Could not open InputStream for the image URI.")
         }
+        val bitmap = BitmapFactory.decodeStream(inputStream)
+        inputStream.close()
+
+        val classifier = ImageClassifier(context)
+        val result = classifier.classify(bitmap)
+        classifier.close()
+
+        return result
     }
 
     Scaffold(
@@ -162,7 +161,10 @@ fun AIDiagnosisScreen(
                 title = { Text("AI Diagnosis") },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -174,7 +176,7 @@ fun AIDiagnosisScreen(
             BottomNavigationBar(
                 primaryColor = primaryColor,
                 modifier = Modifier,
-                navController =navController
+                navController = navController
             )
         }
     ) { paddingValues ->
@@ -186,6 +188,7 @@ fun AIDiagnosisScreen(
                 .verticalScroll(scrollState),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Title text
             Text(
                 text = "Upload a photo for instant diagnosis",
                 fontSize = 18.sp,
@@ -194,7 +197,7 @@ fun AIDiagnosisScreen(
                 modifier = Modifier.padding(bottom = 24.dp)
             )
 
-            // Photo upload component
+            // Image upload card
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -229,15 +232,31 @@ fun AIDiagnosisScreen(
             }
 
             Spacer(modifier = Modifier.height(24.dp))
+
+            // Diagnosis instructions component
             DiagnosisInstructionsComponent()
+
             Spacer(modifier = Modifier.height(32.dp))
 
+            // Button to start diagnosis
             Button(
                 onClick = {
-                    // Launch API call in coroutine
                     if (hasPhoto && imageUri != null) {
                         coroutineScope.launch {
-                            diagnosisResult = analyzeImage(imageUri!!)
+                            try {
+                                val localResult = analyzeImageLocally(context, imageUri!!)
+                                diagnosisResult = DiagnosisResult(
+                                    diagnosis = localResult,
+                                    repair_cost = 1200,
+                                    handyman_cost = 500,
+                                    total_cost = 1700
+                                )
+                                errorMessage = null
+                            } catch (e: Exception) {
+                                diagnosisResult = null
+                                errorMessage = "Error during diagnosis: ${e.localizedMessage}"
+                                e.printStackTrace()
+                            }
                         }
                     }
                 },
@@ -250,7 +269,20 @@ fun AIDiagnosisScreen(
                 Text("Start Diagnosis", fontSize = 16.sp)
             }
 
-            // Display diagnosis result if available
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Show error message, if any
+            errorMessage?.let { error ->
+                Text(
+                    text = error,
+                    color = MaterialTheme.colorScheme.error,
+                    fontSize = 14.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
+            // Display diagnosis result, if available
             diagnosisResult?.let { result ->
                 Spacer(modifier = Modifier.height(24.dp))
                 Text(
@@ -274,7 +306,7 @@ fun AIDiagnosisScreen(
             }
         }
 
-        // Bottom Sheet for choosing image source
+        // Bottom sheet for selecting image source (Camera or Gallery)
         if (showBottomSheet) {
             ModalBottomSheet(
                 onDismissRequest = { showBottomSheet = false },
@@ -292,6 +324,7 @@ fun AIDiagnosisScreen(
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
 
+                    // Option: Take Photo
                     ListItem(
                         headlineContent = { Text("Take Photo") },
                         leadingContent = {
@@ -316,6 +349,7 @@ fun AIDiagnosisScreen(
                         }
                     )
 
+                    // Option: Choose from Gallery
                     ListItem(
                         headlineContent = { Text("Choose from Gallery") },
                         leadingContent = {
@@ -370,7 +404,7 @@ fun DiagnosisInstructionsComponent() {
     }
 }
 
-// Helper function to create a file for storing camera image
+// Helper function to create a file for storing the camera image
 private fun createImageFile(context: Context): File {
     return try {
         val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
@@ -389,6 +423,6 @@ private fun createImageFile(context: Context): File {
 
 @Preview
 @Composable
-fun AiDiagnosisScreenPreview(){
+fun AiDiagnosisScreenPreview() {
     AIDiagnosisScreen(rememberNavController())
 }
